@@ -3,6 +3,7 @@
  * 2015
  */
 #include "Helper.h"
+#include <opencv2/highgui/highgui.hpp>
 
 Helper::Helper()
 {
@@ -10,4 +11,41 @@ Helper::Helper()
 
 Helper::~Helper()
 {
+}
+
+vector<DMatch> Helper::getMatches(const Mat &_descriptor1, const Mat &_descriptor2, const DescriptorMatcher &_matcher)
+{
+	vector<DMatch> matches;
+	_matcher.match(_descriptor1, _descriptor2, matches);
+
+	// Calculation of max and min distances between keypoints
+	double max_dist = 0;
+	double min_dist = 100;
+	for (int i = 0; i < _descriptor1.rows; i++)
+	{
+		double dist = matches[i].distance;
+		min_dist = dist < min_dist ? dist : min_dist;
+		max_dist = dist > max_dist ? dist : max_dist;
+	}
+
+	// Extract good matches
+	vector<DMatch> goodMatches;
+	for (int i = 0; i < _descriptor1.rows; i++)
+	{
+		if (matches[i].distance <= max(2 * min_dist, 0.02))
+			goodMatches.push_back(matches[i]);
+	}
+
+	return goodMatches;
+}
+
+void Helper::showMatches(const Mat &_image1, const Mat &_image2, const vector<KeyPoint> &_keypoints1, const vector<KeyPoint> &_keypoints2, const vector<DMatch> &_matches)
+{
+	Mat imgMatches;
+	drawMatches(_image1, _keypoints1, _image2, _keypoints2, _matches, imgMatches, Scalar::all(-1), Scalar::all(-1), vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+
+	// Show detected matches
+	namedWindow("Good Matches", CV_WINDOW_AUTOSIZE);
+	imshow("Good Matches", imgMatches);
+	waitKey(0);
 }
