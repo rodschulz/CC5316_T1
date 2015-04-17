@@ -1,2 +1,5 @@
 *.o
-./build/*
+build/*
+input/*
+output/*
+.settings/*
