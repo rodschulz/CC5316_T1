@@ -25,6 +25,16 @@ int main(int _nargs, char **_vargs)
 	vector<Mat> images;
 	Helper::loadInput(images, _vargs[1]);
 
+	Mat K = Mat::zeros(3, 4, CV_32FC1);
+	Helper::loadCalibrationMatrix(K, _vargs[1]);
+	Mat Kt;
+	transpose(K, Kt);
+
+	cout << "Calibration matrix read\nK:\n";
+	Helper::printMatrix<float>(K, 2);
+	cout << "Calibration matrix read\nK:\n";
+	Helper::printMatrix<float>(Kt, 2);
+
 	Ptr<FeatureDetector> featureExtractor = FeatureDetector::create("HARRIS");
 	Ptr<DescriptorExtractor> descriptorExtractor = DescriptorExtractor::create("SIFT");
 	FlannBasedMatcher matcher;
@@ -54,16 +64,6 @@ int main(int _nargs, char **_vargs)
 			if (debug)
 				Helper::showMatches(images[k - 1], images[k], keypoints[k - 1], keypoints[k], matches);
 
-//			circle(images[k - 1], keypoints[k - 1][goodMatches[0].queryIdx].pt, 5, Scalar(200), 2, 8, 0);
-//			namedWindow("Img1", CV_WINDOW_AUTOSIZE);
-//			imshow("Img1", images[k - 1]);
-//			waitKey(0);
-//
-//			circle(images[k], keypoints[k][goodMatches[0].trainIdx].pt, 5, Scalar(200), 2, 8, 0);
-//			namedWindow("Img2", CV_WINDOW_AUTOSIZE);
-//			imshow("Img2", images[k]);
-//			waitKey(0);
-
 			if (matches.size() >= 8)
 			{
 				Mat A = Mat::ones(8, 9, CV_32FC1);
@@ -74,11 +74,6 @@ int main(int _nargs, char **_vargs)
 				Mat W = Mat::zeros(8, 9, CV_32FC1);
 				Mat Vt = Mat::zeros(9, 9, CV_32FC1);
 				SVD::compute(A, W, U, Vt, SVD::FULL_UV);
-
-				cout << "V\n";
-				Mat V;
-				transpose(Vt, V);
-				Helper::printMatrix<float>(V);
 
 				Mat F = Mat(3, 3, CV_32FC1);
 				F.at<float>(0, 0) = Vt.at<float>(8, 0);
@@ -91,13 +86,12 @@ int main(int _nargs, char **_vargs)
 				F.at<float>(2, 1) = Vt.at<float>(8, 7);
 				F.at<float>(2, 2) = Vt.at<float>(8, 8);
 
-				cout << "F\n";
-				Helper::printMatrix<float>(F);
+				cout << "F:\n";
+				Helper::printMatrix<float>(F, 5);
 
-				Mat K = Mat(3, 3, CV_32FC1);
-
-				cout << "K\n";
-				Helper::printMatrix<float>(F);
+				Mat E = Kt * F * K;
+				cout << "Essential matrix:\n";
+				Helper::printMatrix<float>(E, 5);
 			}
 		}
 	}
