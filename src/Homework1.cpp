@@ -15,12 +15,15 @@ int main(int _nargs, char **_vargs)
 {
 	bool debug = true;
 
+	if (_nargs < 2)
+	{
+		cout << "Not enough arguments\nUsage:\n\tHomework1 <input_file>\n\n";
+		return EXIT_FAILURE;
+	}
+
+	// Load images
 	vector<Mat> images;
-	images.push_back(imread("./input/c0_img_00617_c0_1311874730447572us.jpg", CV_LOAD_IMAGE_GRAYSCALE));
-	images.push_back(imread("./input/c0_img_00618_c0_1311874730514324us.jpg", CV_LOAD_IMAGE_GRAYSCALE));
-	images.push_back(imread("./input/c0_img_00619_c0_1311874730647599us.jpg", CV_LOAD_IMAGE_GRAYSCALE));
-	images.push_back(imread("./input/c0_img_00620_c0_1311874730714324us.jpg", CV_LOAD_IMAGE_GRAYSCALE));
-	images.push_back(imread("./input/c0_img_00621_c0_1311874730780951us.jpg", CV_LOAD_IMAGE_GRAYSCALE));
+	Helper::loadInput(images, _vargs[1]);
 
 	Ptr<FeatureDetector> featureExtractor = FeatureDetector::create("HARRIS");
 	Ptr<DescriptorExtractor> descriptorExtractor = DescriptorExtractor::create("SIFT");
@@ -29,6 +32,7 @@ int main(int _nargs, char **_vargs)
 	vector<vector<KeyPoint>> keypoints;
 	vector<Mat> descriptors;
 
+	// Process data
 	initModule_nonfree();
 	for (size_t k = 0; k < images.size(); k++)
 	{
@@ -59,6 +63,42 @@ int main(int _nargs, char **_vargs)
 //			namedWindow("Img2", CV_WINDOW_AUTOSIZE);
 //			imshow("Img2", images[k]);
 //			waitKey(0);
+
+			if (matches.size() >= 8)
+			{
+				Mat A = Mat::ones(8, 9, CV_32FC1);
+				for (int i = 0; i < 8; i++)
+					Helper::setMatrixRow(A, i, keypoints[k - 1][matches[i].queryIdx], keypoints[k][matches[i].trainIdx]);
+
+				Mat U = Mat::zeros(8, 8, CV_32FC1);
+				Mat W = Mat::zeros(8, 9, CV_32FC1);
+				Mat Vt = Mat::zeros(9, 9, CV_32FC1);
+				SVD::compute(A, W, U, Vt, SVD::FULL_UV);
+
+				cout << "V\n";
+				Mat V;
+				transpose(Vt, V);
+				Helper::printMatrix<float>(V);
+
+				Mat F = Mat(3, 3, CV_32FC1);
+				F.at<float>(0, 0) = Vt.at<float>(8, 0);
+				F.at<float>(0, 1) = Vt.at<float>(8, 1);
+				F.at<float>(0, 2) = Vt.at<float>(8, 2);
+				F.at<float>(1, 0) = Vt.at<float>(8, 3);
+				F.at<float>(1, 1) = Vt.at<float>(8, 4);
+				F.at<float>(1, 2) = Vt.at<float>(8, 5);
+				F.at<float>(2, 0) = Vt.at<float>(8, 6);
+				F.at<float>(2, 1) = Vt.at<float>(8, 7);
+				F.at<float>(2, 2) = Vt.at<float>(8, 8);
+
+				cout << "F\n";
+				Helper::printMatrix<float>(F);
+
+				Mat K = Mat(3, 3, CV_32FC1);
+
+				cout << "K\n";
+				Helper::printMatrix<float>(F);
+			}
 		}
 	}
 

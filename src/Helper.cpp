@@ -3,6 +3,11 @@
  * 2015
  */
 #include "Helper.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 #include <opencv2/highgui/highgui.hpp>
 
 Helper::Helper()
@@ -48,4 +53,43 @@ void Helper::showMatches(const Mat &_image1, const Mat &_image2, const vector<Ke
 	namedWindow("Good Matches", CV_WINDOW_AUTOSIZE);
 	imshow("Good Matches", imgMatches);
 	waitKey(0);
+}
+
+void Helper::setMatrixRow(Mat &_A, const int _rowIndex, const KeyPoint &_keypoint1, const KeyPoint &_keypoint2)
+{
+	float x1 = _keypoint1.pt.x;
+	float y1 = _keypoint1.pt.y;
+	float x2 = _keypoint2.pt.x;
+	float y2 = _keypoint2.pt.y;
+
+	_A.at<float>(_rowIndex, 0) = x1 * x2;
+	_A.at<float>(_rowIndex, 1) = y1 * x2;
+	_A.at<float>(_rowIndex, 2) = x2;
+	_A.at<float>(_rowIndex, 3) = x1 * y2;
+	_A.at<float>(_rowIndex, 4) = y1 * y2;
+	_A.at<float>(_rowIndex, 5) = y2;
+	_A.at<float>(_rowIndex, 6) = x1;
+	_A.at<float>(_rowIndex, 7) = y1;
+	_A.at<float>(_rowIndex, 8) = 1;
+}
+
+void Helper::loadInput(vector<Mat> &_destination, const string &_inputFile)
+{
+	_destination.clear();
+
+	string line;
+	ifstream file;
+	file.open(_inputFile.c_str(), fstream::in);
+	if (file.is_open())
+	{
+		while (getline(file, line))
+		{
+			if (line.empty() || line.at(0) == '#')
+				continue;
+			_destination.push_back(imread(line, CV_LOAD_IMAGE_GRAYSCALE));
+		}
+		file.close();
+	}
+	else
+		cout << "Unable to open input: " << _inputFile << "\n";
 }
