@@ -23,7 +23,7 @@ LDFLAGS		+= $(shell pkg-config --libs   opencv)
 BUILD_DIR	= build
 SOURCE_DIR	= src
 TARGET		= $(BUILD_DIR)/Homework1
-OBJS		= $(BUILD_DIR)/Homework1.o $(BUILD_DIR)/Helper.o
+OBJS		= $(BUILD_DIR)/Homework1.o $(BUILD_DIR)/Helper.o $(BUILD_DIR)/Printer.o
 
 # targets and rules
 .PHONY: all clean
