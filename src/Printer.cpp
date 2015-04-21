@@ -136,3 +136,11 @@ int Printer::toPixel(const double _value) const
 {
 	return (int) (_value * conversionRate);
 }
+
+void Printer::printTrajectory(vector<Mat> &_poses, const string &_name, const Scalar &_color)
+{
+	Mat image = generateBaseImage();
+	for (Mat m : _poses)
+		drawPoint(image, m.at<double>(0, 3), m.at<double>(2, 3), _color);
+	saveImage(_name, image);
+}
