@@ -43,4 +43,5 @@ all: $(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR)/*
+	rm -rf $(BUILD_DIR)/.fuse*
 

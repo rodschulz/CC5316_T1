@@ -23,4 +23,7 @@ public:
 private:
 	Loader();
 	~Loader();
+
+	// Extract all the filenames present in the given folder
+	static void getFileList(const string &_folder, vector<string> &_fileList);
 };

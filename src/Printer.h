@@ -42,6 +42,8 @@ public:
 	static void drawPoint(Mat &_image, const float _x, const float _y, const Scalar &_color);
 	// prints the given trajectory
 	static void printTrajectory(vector<Mat> &_poses, const string &_name, const Scalar &_color);
+	// prints the given trajectory
+	static void printTrajectory2(vector<Mat> &_poses, const string &_name, const Scalar &_color);
 
 	// Calculates the conversion rate according to the given dimensions
 	void calculateConversionRate(const double _width, const double _height);

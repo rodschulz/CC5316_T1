@@ -8,6 +8,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <dirent.h>
 #include <opencv2/highgui/highgui.hpp>
 
 Loader::Loader()
@@ -28,6 +29,8 @@ void Loader::loadInput(vector<Mat> &_destination, const string &_inputFile)
 	file.open(_inputFile.c_str(), fstream::in);
 	if (file.is_open())
 	{
+		string dataFolder = "";
+
 		while (getline(file, line))
 		{
 			if (line.empty() || line.at(0) == '#')
@@ -37,9 +40,20 @@ void Loader::loadInput(vector<Mat> &_destination, const string &_inputFile)
 			if (lineCount <= 3)
 				continue;
 
-			_destination.push_back(imread(line, CV_LOAD_IMAGE_GRAYSCALE));
+			dataFolder = line;
+			break;
 		}
 		file.close();
+
+		vector<string> filenames;
+		getFileList(dataFolder, filenames);
+
+//		size_t n = filenames.size();
+		size_t n = 400;
+		for (size_t i = 0; i < n; i++)
+		{
+			_destination.push_back(imread(filenames[i], CV_LOAD_IMAGE_GRAYSCALE));
+		}
 	}
 	else
 		cout << "Unable to open input: " << _inputFile << "\n";
@@ -237,4 +251,29 @@ void Loader::loadGroundTruth(vector<Mat> &_poses, const string &_inputFile, cons
 	}
 	else
 		cout << "Unable to open input: " << _inputFile << "\n";
+}
+
+void Loader::getFileList(const string &_folder, vector<string> &_fileList)
+{
+	DIR *folder;
+	struct dirent *epdf;
+	_fileList.clear();
+
+	if ((folder = opendir(_folder.c_str())) != NULL)
+	{
+		while ((epdf = readdir(folder)) != NULL)
+		{
+			if (strcmp(epdf->d_name, ".") == 0 || strcmp(epdf->d_name, "..") == 0)
+				continue;
+
+			_fileList.push_back(_folder + epdf->d_name);
+		}
+		closedir(folder);
+	}
+	else
+	{
+		cout << "ERROR: can't open folder " << _folder << "\n";
+	}
+
+	sort(_fileList.begin(), _fileList.end());
 }

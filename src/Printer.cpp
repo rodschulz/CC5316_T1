@@ -144,3 +144,19 @@ void Printer::printTrajectory(vector<Mat> &_poses, const string &_name, const Sc
 		drawPoint(image, m.at<double>(0, 3), m.at<double>(2, 3), _color);
 	saveImage(_name, image);
 }
+
+void Printer::printTrajectory2(vector<Mat> &_poses, const string &_name, const Scalar &_color)
+{
+	Mat image = generateBaseImage();
+	Mat image2 = generateBaseImage();
+	Mat image3 = generateBaseImage();
+	for (Mat m : _poses)
+	{
+		drawPoint(image, m.at<double>(0, 0), m.at<double>(2, 0), _color); //x,z
+		drawPoint(image2, m.at<double>(0, 0), m.at<double>(1, 0), _color); //x,y
+		drawPoint(image3, m.at<double>(1, 0), m.at<double>(2, 0), _color); //y,z
+	}
+	saveImage(_name, image);
+	saveImage("2" + _name, image2);
+	saveImage("3" + _name, image3);
+}
